@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>قاضی شو — بازی قضایی ۲۰ مرحله‌ای</title>
+  <style>
+    :root{
+      --bg1:#1f005c;
+      --bg2:#5b0060;
+      --bg3:#870160;
+      --bg4:#ac255e;
+      --bg5:#ca485c;
+      --glass-bg: rgba(255,255,255,0.12);
+      --glass-stroke: rgba(255,255,255,0.25);
+      --text:#f5f7fb;
+      --muted:#cfd3df;
+      --primary:#7cf0ff;
+      --accent:#8cff7a;
+      --danger:#ff6b6b;
+      --warning:#ffd166;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    /* پس‌زمینه گرادیانی پویا */
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--text);
+      font-family: "IRANSans","Vazirmatn","Tahoma","Segoe UI",system-ui, -apple-system, sans-serif;
+      background: linear-gradient(-45deg,var(--bg1),var(--bg2),var(--bg3),var(--bg4),var(--bg5));
+      background-size: 400% 400%;
+      animation: gradientShift 18s ease infinite;
+      overflow-x:hidden;
+    }
+    @keyframes gradientShift{
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
+    }
+
+    /* حباب‌های تزئینی */
+    .blob{
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: .35;
+      z-index:0;
+      animation: float 14s ease-in-out infinite;
+    }
+    .blob.b1{ width:320px;height:320px; background:#8a2be2; top:5%; left:8%; animation-delay:0s;}
+    .blob.b2{ width:260px;height:260px; background:#00d4ff; bottom:12%; right:10%; animation-delay:2s;}
+    .blob.b3{ width:200px;height:200px; background:#ff6b6b; top:50%; right:30%; animation-delay:4s;}
+    @keyframes float{
+      0%,100%{ transform: translateY(0) translateX(0) }
+      50%{ transform: translateY(-20px) translateX(10px) }
+    }
+
+    /* ظرف شیشه‌ای اصلی */
+    .wrap{
+      position: relative;
+      z-index:1;
+      max-width: 980px;
+      margin: 40px auto 60px;
+      padding: 24px;
+    }
+    .card{
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-stroke);
+      backdrop-filter: blur(12px) saturate(140%);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    /* هدر و آمار */
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:20px 22px;
+      border-bottom:1px solid rgba(255,255,255,.15);
+    }
+    .title{
+      display:flex; align-items:center; gap:10px;
+      font-weight: 800; letter-spacing:.2px;
+      font-size:22px;
+    }
+    .badge{
+      background: linear-gradient(135deg,#00eaff,#7cff7c);
+      color:#0b0f17;
+      padding:6px 10px; border-radius:999px;
+      font-size:12px; font-weight:700;
+    }
+    .stats{
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .stat{
+      display:flex; align-items:center; gap:8px;
+      background: rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.18);
+      padding:8px 12px; border-radius:12px;
+      font-size:13px;
+    }
+    .stat i{font-style:normal; font-weight:700}
+    .coin{ color:#ffd166 }
+    .score{ color:#8cff7a }
+    .mist{ color:#ff8fa3 }
+
+    /* نوار پیشرفت */
+    .progress{
+      padding: 12px 22px;
+    }
+    .bar{
+      width:100%; height:10px; background:rgba(255,255,255,.1);
+      border:1px solid rgba(255,255,255,.2);
+      border-radius: 999px; overflow:hidden;
+    }
+    .bar > .fill{
+      height:100%; width:0%;
+      background: linear-gradient(90deg,#7cf0ff,#8cff7a);
+      box-shadow: 0 0 12px rgba(124,240,255,.6);
+      transition: width .6s cubic-bezier(.22,.61,.36,1);
+    }
+    .bar-label{
+      margin-top:8px; font-size:12px; color:var(--muted);
+      display:flex; justify-content:space-between;
+    }
+
+    /* بدنه مرحله */
+    .stage{
+      padding: 22px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:18px;
+    }
+    .case{
+      background: rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:16px;
+      padding:16px;
+      animation: fadeIn .5s ease both;
+    }
+    .case h3{
+      margin:0 0 6px 0; font-size:18px;
+    }
+    .case p{
+      margin:0; color: var(--muted); line-height:1.9;
+    }
+
+    /* گزینه‌ها */
+    .choices{
+      display:grid; gap:12px;
+    }
+    .btn{
+      position:relative;
+      cursor:pointer;
+      border:none;
+      padding:14px 16px;
+      font-size:15px;
+      font-weight:700;
+      border-radius:14px;
+      color:#0b0f17;
+      background: linear-gradient(135deg,#ffffff,#e6fbff);
+      box-shadow: 0 10px 18px rgba(0,0,0,.18), inset 0 0 0 0 rgba(0,0,0,0);
+      transition: transform .1s ease, box-shadow .2s ease, filter .2s ease;
+      text-align:right;
+    }
+    .btn:hover{ transform: translateY(-2px); filter: brightness(1.03); }
+    .btn:active{ transform: translateY(0); box-shadow: 0 6px 14px rgba(0,0,0,.22); }
+    .btn .sub{
+      display:block; font-weight:600; opacity:.7; font-size:12px;
+      color:#263238;
+    }
+    .btn.correct{
+      background: linear-gradient(135deg,#b7ffbf,#7cff7a);
+      box-shadow: 0 10px 24px rgba(140,255,122,.35);
+      animation: pop .45s ease both;
+    }
+    .btn.wrong{
+      background: linear-gradient(135deg,#ffd6d6,#ffb0b0);
+      box-shadow: 0 10px 24px rgba(255,107,107,.35);
+      animation: shake .45s ease both;
+    }
+    .disabled{
+      pointer-events:none; opacity:.7; filter: grayscale(.15);
+    }
+
+    /* راهنما */
+    .help{
+      padding: 0 22px 22px 22px;
+    }
+    details{
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:14px;
+      padding:12px 14px;
+    }
+    summary{ cursor:pointer; font-weight:800; }
+    .help p{ margin:8px 0 0; color:var(--muted); }
+
+    /* اوورلی وقفه تنبیهی */
+    .overlay{
+      position:absolute; inset:0;
+      background: rgba(11,15,23,.55);
+      display:none; align-items:center; justify-content:center;
+      backdrop-filter: blur(2px);
+    }
+    .overlay.show{ display:flex; }
+    .pause-box{
+      background: rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.25);
+      border-radius:16px;
+      padding:14px 18px;
+      text-align:center;
+      box-shadow: var(--shadow);
+      animation: fadeIn .3s ease both;
+    }
+    .pause-box h4{ margin:0 0 6px 0; }
+    .pause-box p{ margin:0; color:var(--muted) }
+
+    /* پایان بازی */
+    .end{
+      display:none; text-align:center; padding:26px;
+    }
+    .end.show{ display:block; }
+    .end h2{ margin-top:0 }
+    .pill{
+      display:inline-block;
+      padding:10px 16px; border-radius:999px;
+      background: rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.25);
+      margin:0 6px; font-weight:800;
+    }
+    .restart{
+      margin-top:14px;
+      background: linear-gradient(135deg,#00eaff,#8cff7a);
+      color:#0b0f17; border:none; border-radius:12px;
+      padding:12px 16px; font-weight:800; cursor:pointer;
+      box-shadow: 0 10px 20px rgba(0,234,255,.25);
+    }
+
+    /* انیمیشن‌ها */
+    @keyframes fadeIn{ from{opacity:0; transform: translateY(6px)} to{opacity:1; transform: none} }
+    @keyframes pop{ 0%{ transform: scale(.98) } 60%{ transform: scale(1.02) } 100%{ transform: scale(1) } }
+    @keyframes shake{
+      0%,100%{ transform: translateX(0) }
+      20%{ transform: translateX(-6px) }
+      40%{ transform: translateX(6px) }
+      60%{ transform: translateX(-4px) }
+      80%{ transform: translateX(4px) }
+    }
+
+    /* کاغذ رنگی (کنفِتی) */
+    .confetti{
+      position: absolute;
+      width:8px; height:14px;
+      border-radius:2px;
+      opacity:.9;
+      animation: fall 900ms ease-out forwards;
+    }
+    @keyframes fall{
+      to{
+        transform: translateY(120px) rotate(240deg);
+        opacity:0;
+      }
+    }
+
+    /* ریسپانسیو */
+    @media (max-width:640px){
+      .header{ flex-direction:column; align-items:flex-start }
+      .title{ font-size:19px }
+      .stats{ width:100% }
+    }
+  </style>
+</head>
+<body>
+  <!-- حباب‌های پس‌زمینه -->
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+
+  <div class="wrap">
+    <div class="card" id="game">
+      <div class="header">
+        <div class="title">
+          ⚖️ قاضی شو
+          <span class="badge">۲۰ مرحله</span>
+        </div>
+        <div class="stats">
+          <div class="stat"><span>مرحله:</span> <i id="stageIdx">1</i> / 20</div>
+          <div class="stat score"><span>امتیاز:</span> <i id="score">0</i></div>
+          <div class="stat coin"><span>سکه:</span> <i id="coins">100</i> 🪙</div>
+          <div class="stat mist"><span>اشتباه این مرحله:</span> <i id="mistakes">0</i>/3</div>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div class="bar"><div class="fill" id="progressFill"></div></div>
+        <div class="bar-label">
+          <span id="caseTitle">پرونده</span>
+          <span id="progressText">0% پیشرفت</span>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="case">
+          <h3 id="caseHeader">پرونده شماره ۱</h3>
+          <p id="caseDesc">توضیحات پرونده در اینجا نمایش داده می‌شود.</p>
+        </div>
+
+        <div class="choices" id="choices"></div>
+      </div>
+
+      <div class="help">
+        <details>
+          <summary>راهنما و قوانین بازی</summary>
+          <p>در هر مرحله یک پرونده کوتاه می‌خوانید و باید از میان سه حکم، مناسب‌ترین را انتخاب کنید.</p>
+          <p>هر پاسخ درست: +۱۰ امتیاز و +۵ سکه. هر پاسخ نادرست: −۵ سکه و انیمیشن خطا.</p>
+          <p>اگر ۲ بار پیاپی اشتباه کنید، ۵ ثانیه وقفه تنبیهی می‌گیرید. با سومین اشتباه، مرحله با جریمه اضافه تمام می‌شود.</p>
+        </details>
+      </div>
+
+      <div class="overlay" id="overlay">
+        <div class="pause-box">
+          <h4>⏳ وقفه تنبیهی</h4>
+          <p>برای ادامه <b><span id="cooldown">5</span> ثانیه</b> صبر کنید...</p>
+        </div>
+      </div>
+
+      <div class="end" id="end">
+        <h2>🎉 پایان بازی</h2>
+        <p><span class="pill">امتیاز کل: <b id="finalScore">0</b></span> <span class="pill">سکه نهایی: <b id="finalCoins">0</b> 🪙</span></p>
+        <p id="finalMsg" style="color:#cfead3; margin-top:8px"></p>
+        <button class="restart" id="restart">شروع دوباره</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- داده‌های ۲۰ مرحله (کاملا فارسی) ---
+    const levels = [
+      {
+        title: "سرقت خرد از فروشگاه",
+        desc: "متهم یک قوطی نوشابه را بدون پرداخت برداشته است. سابقه کیفری ندارد و بلافاصله عذرخواهی کرده.",
+        options: [
+          "تذکر کتبی + ۸ ساعت خدمات عمومی",
+          "جریمه نقدی سبک + دوره آموزشی حقوق شهروندی",
+          "حبس تعزیری کوتاه‌مدت"
+        ],
+        correct: 1
+      },
+      {
+        title: "عبور از چراغ قرمز",
+        desc: "راننده از چراغ قرمز عبور کرده اما حادثه‌ای رخ نداده و بیمه معتبر دارد.",
+        options: [
+          "اخطار و ضبط گواهینامه برای یک ماه",
+          "جریمه نقدی متعارف + یک کارگاه ایمنی رانندگی",
+          "حبس تعلیقی به مدت سه ماه"
+        ],
+        correct: 1
+      },
+      {
+        title: "تخریب شیشه اتوبوس شهری",
+        desc: "در نزاع لفظی، شیشه اتوبوس شهری شکسته شده و شهرداری مطالبه خسارت دارد.",
+        options: [
+          "الزام به جبران کامل خسارت + خدمات عمومی",
+          "تنها تذکر شفاهی",
+          "حبس تعزیری طولانی"
+        ],
+        correct: 0
+      },
+      {
+        title: "جعل کارت دانشجویی",
+        desc: "برای دریافت تخفیف، کارت دانشجویی جعلی ارائه شده است. اعتراف و اظهار ندامت وجود دارد.",
+        options: [
+          "لغو همه تخفیف‌ها برای ۶ ماه + دوره اخلاق شهروندی",
+          "جریمه سنگین + سابقه کیفری دائم",
+          "حبس تعزیری"
+        ],
+        correct: 0
+      },
+      {
+        title: "توهین در فضای مجازی",
+        desc: "متهم الفاظ توهین‌آمیز منتشر کرده و سپس عذرخواهی عمومی نموده و پست را حذف کرده است.",
+        options: [
+          "میانجیگری + تعهد کتبی + کارگاه سواد رسانه‌ای",
+          "جریمه سنگین و منع دائمی از شبکه‌های اجتماعی",
+          "حبس تعزیری"
+        ],
+        correct: 0
+      },
+      {
+        title: "شکار غیرمجاز",
+        desc: "یک پرنده حفاظت‌شده شکار شده است. ابزار شکار ضبط شده.",
+        options: [
+          "تذکر ساده",
+          "جریمه قانونی + ضبط ادوات + دوره محیط‌زیست",
+          "حبس تعزیری بلندمدت"
+        ],
+        correct: 1
+      },
+      {
+        title: "اختلاس جزئی با استرداد",
+        desc: "کارمند مبلغ کمی را برداشته اما سریعاً بازگردانده است. اعتماد عمومی مخدوش شده.",
+        options: [
+          "تنها اخطار اداری",
+          "جریمه و محرومیت موقت از سمت + بازگرداندن وجه",
+          "حبس سنگین"
+        ],
+        correct: 1
+      },
+      {
+        title: "ضرب و جرح خفیف",
+        desc: "نزاع خیابانی بدون سلاح، کبودی سطحی. طرفین تمایل به سازش دارند.",
+        options: [
+          "میانجیگری + عذرخواهی رسمی + خدمات عمومی",
+          "جریمه سنگین + سابقه کیفری",
+          "حبس تعزیری"
+        ],
+        correct: 0
+      },
+      {
+        title: "نفوذ به ایمیل",
+        desc: "ورود غیرمجاز به حساب ایمیل بدون انتشار محتوا. نقض حریم خصوصی.",
+        options: [
+          "تذکر ساده",
+          "جریمه و دوره حفظ حریم خصوصی + تعهد عدم تکرار",
+          "حبس تعزیری"
+        ],
+        correct: 1
+      },
+      {
+        title: "آتش‌زدن سطل زباله",
+        desc: "آتش‌سوزی عمدی کوچک در فضای عمومی، بدون خسارت جانی.",
+        options: [
+          "جریمه + خدمات عمومی مرتبط با پاکسازی شهر",
+          "بی‌اهمیت تلقی شود",
+          "حبس طولانی"
+        ],
+        correct: 0
+      },
+      {
+        title: "سوار شدن بدون بلیت (سومین بار)",
+        desc: "مسافر برای سومین بار بدون بلیت سوار مترو شده است.",
+        options: [
+          "تذکر مجدد",
+          "جریمه تشدیدی + الزام به خرید بلیت ماهانه",
+          "حبس تعزیری"
+        ],
+        correct: 1
+      },
+      {
+        title: "مزاحمت تلفنی مکرر",
+        desc: "تماس‌های آزاردهنده تکراری ثبت شده است.",
+        options: [
+          "میانجیگری و هشدار آخر",
+          "جریمه و محرومیت موقت از خطوط + دوره آزار سایبری",
+          "حبس تعزیری"
+        ],
+        correct: 1
+      },
+      {
+        title: "نقاشی روی دیوار مدرسه",
+        desc: "گرافیتی عمدی روی دیوار مدرسه. بدون توهین‌آمیز بودن.",
+        options: [
+          "پاکسازی و مرمت دیوار + کارگاه حقوق مالکیت",
+          "بی‌مجازات",
+          "حبس"
+        ],
+        correct: 0
+      },
+      {
+        title: "کلاه‌برداری اینترنتی",
+        desc: "فروش کالای جعلی به چند نفر و عدم استرداد وجه.",
+        options: [
+          "تذکر",
+          "جریمه سنگین + استرداد کامل + محرومیت از پلتفرم",
+          "حبس بسیار طولانی"
+        ],
+        correct: 1
+      },
+      {
+        title: "رانندگی در مستی",
+        desc: "تست مثبت الکل، حادثه‌ای رخ نداده.",
+        options: [
+          "جریمه تشدیدی + تعلیق گواهینامه + دوره بازآموزی",
+          "تذکر",
+          "حبس طولانی"
+        ],
+        correct: 0
+      },
+      {
+        title: "نگهداری حیوان ممنوع در مجتمع",
+        desc: "علی‌رغم تذکرات مدیریت، مقررات مجتمع رعایت نشده.",
+        options: [
+          "میانجیگری + یافتن راه‌حل (سروصدا/بهداشت)",
+          "جریمه داخلی مجتمع + تعهد رعایت مقررات",
+          "حبس"
+        ],
+        correct: 1
+      },
+      {
+        title: "مزاحمت صوتی نیمه‌شب",
+        desc: "پخش موسیقی بسیار بلند در ساعات استراحت، سابقه قبلی ندارد.",
+        options: [
+          "اخطار رسمی + جریمه سبک",
+          "حبس",
+          "بی‌اهمیت"
+        ],
+        correct: 0
+      },
+      {
+        title: "آلودگی محیط‌زیست صنعتی",
+        desc: "رهاسازی پسماند در طبیعت توسط واحد تولیدی.",
+        options: [
+          "تذکر",
+          "جریمه سنگین + الزام به پاکسازی و اصلاح فرآیند",
+          "حبس طولانی برای همه کارکنان"
+        ],
+        correct: 1
+      },
+      {
+        title: "افشای اطلاعات محرمانه شرکت",
+        desc: "کارمند اسناد داخلی را منتشر کرده. خسارت اعتبار وارد شده.",
+        options: [
+          "میانجیگری",
+          "جریمه و محرومیت شغلی موقت + دوره اخلاق حرفه‌ای",
+          "حبس طولانی"
+        ],
+        correct: 1
+      },
+      {
+        title: "حمل سلاح سرد در اماکن عمومی",
+        desc: "همراه داشتن سلاح سرد بدون استفاده. نگرانی عمومی ایجاد شده.",
+        options: [
+          "ضبط سلاح + جریمه + دوره آگاهی از قوانین سلاح",
+          "بی‌اهمیت",
+          "حبس طولانی"
+        ],
+        correct: 0
+      },
+    ];
+
+    // --- وضعیت بازی ---
+    let idx = 0;
+    let score = 0;
+    let coins = 100;
+    let mistakes = 0;
+    let locked = false;
+
+    // --- ارجاع‌ها ---
+    const stageIdxEl = document.getElementById("stageIdx");
+    const scoreEl = document.getElementById("score");
+    const coinsEl = document.getElementById("coins");
+    const mistakesEl = document.getElementById("mistakes");
+    const caseTitleEl = document.getElementById("caseTitle");
+    const caseHeaderEl = document.getElementById("caseHeader");
+    const caseDescEl = document.getElementById("caseDesc");
+    const choicesEl = document.getElementById("choices");
+    const progressFillEl = document.getElementById("progressFill");
+    const progressTextEl = document.getElementById("progressText");
+    const overlayEl = document.getElementById("overlay");
+    const cooldownEl = document.getElementById("cooldown");
+    const endEl = document.getElementById("end");
+    const finalScoreEl = document.getElementById("finalScore");
+    const finalCoinsEl = document.getElementById("finalCoins");
+    const finalMsgEl = document.getElementById("finalMsg");
+    const restartBtn = document.getElementById("restart");
+
+    function formatPercent(v){ return Math.round(v*100) }
+
+    function renderLevel(){
+      locked = false;
+      mistakes = 0;
+      mistakesEl.textContent = mistakes.toString();
+
+      const L = levels[idx];
+      stageIdxEl.textContent = (idx+1).toString();
+      caseTitleEl.textContent = `پرونده: ${L.title}`;
+      caseHeaderEl.textContent = `پرونده شماره ${idx+1} — ${L.title}`;
+      caseDescEl.textContent = L.desc;
+
+      const progress = (idx)/levels.length;
+      progressFillEl.style.width = `${progress*100}%`;
+      progressTextEl.textContent = `${formatPercent(progress)}% پیشرفت`;
+
+      choicesEl.innerHTML = "";
+      L.options.forEach((opt, i)=>{
+        const btn = document.createElement("button");
+        btn.className = "btn";
+        btn.innerHTML = `${opt} <span class="sub">گزینه ${i+1}</span>`;
+        btn.addEventListener("click", ()=> choose(i, btn));
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function updateHUD(){
+      scoreEl.textContent = score.toString();
+      coinsEl.textContent = coins.toString();
+      mistakesEl.textContent = mistakes.toString();
+    }
+
+    function lockChoices(state){
+      const buttons = choicesEl.querySelectorAll(".btn");
+      buttons.forEach(b => b.classList.toggle("disabled", state));
+      locked = state;
+    }
+
+    function sprinkleConfetti(x, y){
+      const colors = ["#7cff7a","#7cf0ff","#ffd166","#ff6b6b","#c492ff"];
+      for(let i=0;i<24;i++){
+        const c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = (x + (Math.random()*120-60))+"px";
+        c.style.top = (y + (Math.random()*40-20))+"px";
+        c.style.background = colors[Math.floor(Math.random()*colors.length)];
+        c.style.transform = `translateY(0) rotate(${Math.random()*120}deg)`;
+        document.body.appendChild(c);
+        setTimeout(()=> c.remove(), 1000);
+      }
+    }
+
+    function choose(i, btn){
+      if(locked) return;
+      const L = levels[idx];
+      const buttons = choicesEl.querySelectorAll(".btn");
+      lockChoices(true);
+
+      if(i === L.correct){
+        btn.classList.add("correct");
+        score += 10;
+        coins += 5;
+        updateHUD();
+
+        // محل کلیک تقریبی برای کنفتی
+        const rect = btn.getBoundingClientRect();
+        sprinkleConfetti(rect.left + rect.width/2, rect.top + window.scrollY);
+
+        setTimeout(()=>{
+          // اگر آخر نیست، برو بعدی
+          nextLevel();
+        }, 700);
+      } else {
+        btn.classList.add("wrong");
+        mistakes += 1;
+        coins = Math.max(0, coins - 5);
+        updateHUD();
+
+        // نشان دادن پاسخ درست به‌صورت ظریف پس از خطا اول/دوم؟ (اختیاری: خیر)
+        if(mistakes === 2){
+          // وقفه ۵ ثانیه‌ای
+          showCooldown(5).then(()=>{
+            lockChoices(false);
+            btn.classList.remove("wrong");
+          });
+        } else if(mistakes >= 3){
+          // جریمه اضافه و رفتن به مرحله بعد
+          coins = Math.max(0, coins - 10);
+          updateHUD();
+          setTimeout(()=>{
+            nextLevel();
+          }, 550);
+        } else {
+          // یک اشتباه: اجازه تلاش مجدد
+          setTimeout(()=>{
+            lockChoices(false);
+            btn.classList.remove("wrong");
+          }, 450);
+        }
+      }
+    }
+
+    function showCooldown(seconds){
+      overlayEl.classList.add("show");
+      return new Promise(resolve=>{
+        let t = seconds;
+        cooldownEl.textContent = t.toString();
+        const iv = setInterval(()=>{
+          t--;
+          cooldownEl.textContent = t.toString();
+          if(t<=0){
+            clearInterval(iv);
+            overlayEl.classList.remove("show");
+            resolve();
+          }
+        },1000);
+      });
+    }
+
+    function nextLevel(){
+      idx++;
+      if(idx >= levels.length){
+        endGame();
+      } else {
+        renderLevel();
+      }
+    }
+
+    function endGame(){
+      // تکمیل نوار پیشرفت
+      progressFillEl.style.width = "100%";
+      progressTextEl.textContent = "100% پیشرفت";
+
+      finalScoreEl.textContent = score.toString();
+      finalCoinsEl.textContent = coins.toString();
+      finalMsgEl.textContent = score >= 150
+        ? "شاهکار قضایی! تناسب و عدالت را خوب رعایت کردی."
+        : score >= 100
+          ? "عالی بود! چند مورد جای بهبود دارد."
+          : "خوبه! با دقت به جزئیات پرونده‌ها بهتر می‌شی.";
+
+      document.querySelector(".stage").style.display = "none";
+      document.querySelector(".help").style.display = "none";
+      endEl.classList.add("show");
+    }
+
+    restartBtn.addEventListener("click", ()=>{
+      idx = 0; score = 0; coins = 100; mistakes = 0; locked = false;
+      document.querySelector(".stage").style.display = "";
+      document.querySelector(".help").style.display = "";
+      endEl.classList.remove("show");
+      renderLevel(); updateHUD();
+    });
+
+    // شروع
+    renderLevel();
+    updateHUD();
+  </script>
+</body>
+  </html>
