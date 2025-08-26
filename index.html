@@ -3,7 +3,7 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>قاضی شوید - بازی قضاوت در جرائم</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
@@ -142,6 +142,8 @@
                 
                 <p>این بازی با هدف آشنایی با فرآیند قضاوت و تصمیم‌گیری‌های حقوقی طراحی شده است.</p>
 
+                <p>یادتان باشد که هیچوقت نزارید سکه هاتون تموم شه چون اونجوری شما بازنده میشید</p>
+
                 <p>طراحی و توسعه توسط شرکت جاودان گیمز</p>
                 
                 <div class="mt-8 flex justify-center">
@@ -165,7 +167,7 @@
             <h2 class="text-3xl font-bold text-center mb-6">حمایت از بازی</h2>
             
             <div class="space-y-6 text-gray-700">
-                <p class="text-lg">این بازی به صورت رایگان ارائه شده است. با حمایت مالی شما می‌توانیم نسخه‌های بهتر و امکانات بیشتری به بازی اضافه کنیم.</p>
+                <p class="text-lg">این بازی به صورت کاملا رایگان و بدون تبلیفات ارائه شده است. با حمایت مالی شما می‌توانیم نسخه‌های بهتر و امکانات بیشتری به بازی اضافه کنیم.</p>
                 
                 <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
                     <h3 class="font-bold text-blue-800 mb-2">اهداف توسعه بازی:</h3>
@@ -249,7 +251,7 @@
         </header>
         
         <!-- Main Game Content -->
-        <main class="flex-grow flex flex-col items-center justify-center p-6">
+        <main class="flex-grow flex flex-col items-center justify-center p-6 overflow-x-hidden">
             <div id="case-container" class="max-w-4xl w-full bg-white rounded-xl shadow-lg p-8 scale-up">
                 <div class="flex justify-between items-center mb-6">
                     <h2 id="case-title" class="text-2xl font-bold text-gray-800">پرونده شماره ۱</h2>
@@ -312,11 +314,45 @@
             </div>
             
             <div id="gavel-icon" class="mt-8">
-                <img src="https://cdn-icons-png.flaticon.com/512/2777/2777154.png" alt="Gavel" class="w-20 h-20">
+                <img src="https://raw.githubusercontent.com/JavadCamback/Ghezavat/main/1755436439642.png" alt="Gavel" class="w-20 h-20">
             </div>
         </main>
     </div>
     
+    <!-- Restriction Modal -->
+    <div id="restriction-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 scale-up text-center">
+            <div class="bg-red-100 p-3 rounded-full inline-block">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold mt-4 text-red-600">محدودیت!</h3>
+            <p class="mt-2 text-gray-600">به دلیل دو اشتباه متوالی, 20 سکه از شما کسر شد و 80 ثانیه محدود شدید</p>
+            <div class="mt-4">
+                <div id="countdown" class="text-3xl font-bold text-blue-600">۲۰</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Lost Modal -->
+    <div id="game-lost-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-8 scale-up text-center">
+            <div class="bg-purple-100 p-3 rounded-full inline-block">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold mt-4">شما باختید!</h3>
+            <p class="mt-2 text-gray-600">سکه‌های شما به پایان رسیده است.</p>
+            <div class="mt-8">
+                <button onclick="restartGame()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg">
+                    بازی مجدد
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Result Modal -->
     <div id="result-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 scale-up">
@@ -351,7 +387,7 @@
                         </svg>
                         <span class="font-bold text-yellow-700">اخطار!</span>
                     </div>
-                    <p class="mt-2 text-yellow-700">شما یک اشتباه دیگر دارید. در صورت تکرار، محدودیت برای شما اعمال خواهد شد.</p>
+                    <p class="mt-2 text-yellow-700">شما یک اشتباه دیگر دارید. در صورت تکرار، 20 سکه از شما کسر و محدودیت 80 ثانیه ای برای شما اعمال خواهد شد.اگر سکه های شما تمام شود شما دیگر نمیتوانید ادامه دهید!</p>
                 </div>
                 
                 <div id="restriction-applied" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 hidden">
@@ -381,7 +417,7 @@
                     </svg>
                 </div>
                 <h3 class="text-2xl font-bold mt-4">پایان بازی!</h3>
-                <p class="mt-2 text-gray-600">شما ۱۵ مورد از ۲۰ پرونده را به درستی قضاوت کردید.</p>
+                <p class="mt-2 text-gray-600">شما توانستید تمام پرونده های این بازی را پشت سر بگذارید!</p>
                 
                 <div class="mt-6 bg-gray-50 rounded-lg p-4">
                     <div class="flex justify-between mb-2">
@@ -420,6 +456,7 @@
             coins: 50,
             mistakes: 0,
             correctAnswers: 0,
+            consecutiveMistakes: 0,
             isRestricted: false,
             cases: [
             {
@@ -468,11 +505,11 @@
     description: "در تابستان ۱۴۰۱، یک انبار پوشاک در شهر ری دچار آتش‌سوزی عمدی شد. نگهبان سابق انبار که به دلیل اختلاف مالی اخراج شده بود مظنون اصلی شناخته شد. فیلم‌های امنیتی و آثار مواد آتش‌زا در محل، دخالت او را تأیید کرد.",
     options: [
       "تبرئه به علت نبود شاهد مستقیم",
-      "پنج سال حبس و جبران خسارت وارده",
       "جریمه نقدی بدون ثبت سابقه کیفری",
+      "پنج سال حبس و جبران خسارت وارده",
       "قصاص به دلیل تخریب اموال عمومی"
     ],
-    correctAnswer: 2
+    correctAnswer: 3
   },
   {
     id: 5,
@@ -480,12 +517,12 @@
     type: "کیفری",
     description: "یک گروه سه نفره با ایجاد سایت جعلی فروش بلیت هواپیما، از صدها نفر مبالغ کلانی گرفتند. شاکیان متعددی شکایت کردند. پلیس فتا با ردیابی تراکنش‌ها متهمان را شناسایی و بیش از ۱۰ میلیارد تومان کلاهبرداری کشف شد.",
     options: [
-      "تبرئه چون مشتریان داوطلبانه پول واریز کرده‌اند",
       "حبس تعزیری و بازگرداندن وجوه به شاکیان",
+      "تبرئه چون مشتریان داوطلبانه پول واریز کرده‌اند",
       "فقط جریمه نقدی و آزادی سریع",
       "حبس ابد به جرم محاربه"
     ],
-    correctAnswer: 2
+    correctAnswer: 1
   },
   {
     id: 6,
@@ -494,11 +531,11 @@
     description: "در کرج، نوجوانی ۱۵ ساله پس از خروج از مدرسه ربوده شد. ربایندگان با تماس تلفنی درخواست ۲ میلیارد تومان کردند. پلیس با ردیابی تماس‌ها مخفیگاه را شناسایی کرد و کودک سالم آزاد شد. انگیزه صرفاً اخاذی مالی بود.",
     options: [
       "تبرئه چون خانواده پول نداده‌اند",
-      "حبس سنگین به جرم آدم‌ربایی و تهدید",
+      "اخطار و تعهد کتبی بدون سابقه کیفری",
       "جریمه نقدی سبک برای متهمان",
-      "اخطار و تعهد کتبی بدون سابقه کیفری"
+      "حبس سنگین به جرم آدم‌ربایی و تهدید"
     ],
-    correctAnswer: 2
+    correctAnswer: 4
   },
   {
     id: 7,
@@ -533,11 +570,11 @@
     description: "در یک نزاع خیابانی در شیراز، چند جوان با سلاح سرد درگیر شدند. یکی از رهگذران زخمی شد. عامل اصلی جرح شناسایی گردید و بقیه فقط در نزاع شرکت داشتند. پلیس ۱۵ نفر را بازداشت کرد.",
     options: [
       "تبرئه دسته‌جمعی به دلیل رضایت نسبی شاکی",
-      "حبس برای عامل جرح و شلاق برای بقیه",
       "اعدام برای همه‌ی بازداشت‌شدگان",
+      "حبس برای عامل جرح و شلاق برای بقیه",
       "جریمه نقدی سبک برای همگان"
     ],
-    correctAnswer: 2
+    correctAnswer: 3
   },
   {
     id: 10,
@@ -572,12 +609,12 @@
     type: "کیفری",
     description: "جوانی در اصفهان به دلیل اختلاف شخصی روی صورت دختر همسایه اسید پاشید. قربانی دچار نابینایی نسبی و ۴۰ درصد سوختگی شد. شواهد دوربین مداربسته و شهادت همسایگان متهم را رسوا کرد. خانواده قربانی تقاضای قصاص کردند.",
     options: [
-      "پرداخت جریمه نقدی بدون حبس",
-      "قصاص شیمیایی و حبس تعزیری",
+    "قصاص شیمیایی و حبس تعزیری",
+    "پرداخت جریمه نقدی بدون حبس",
       "دو سال حبس تعلیقی بدون قصاص",
       "تبرئه به دلیل نبود انگیزه مالی"
     ],
-    correctAnswer: 2
+    correctAnswer: 1
   },
   {
     id: 13,
@@ -586,11 +623,11 @@
     description: "در پاییز ۱۴۰۱، مدیر یک شرکت پیمانکاری در مناقصه‌ای با جعل اسناد و مدارک توانست پروژه‌ای دولتی را به نام شرکت خود ثبت کند. پس از مدتی، بازرسی کل کشور متوجه مغایرت‌های آشکار در مدارک شد. کارشناسان رسمی دادگستری جعل امضاها را تأیید کردند.",
     options: [
       "تخفیف مجازات به دلیل رضایت شاکی",
-      "حبس پنج سال و ابطال قرارداد جعلی",
+      "انتقال رسمی قرارداد به متهم",
       "پرداخت جریمه سبک بدون حبس",
-      "انتقال رسمی قرارداد به متهم"
+      "حبس پنج سال و ابطال قرارداد جعلی",
     ],
-    correctAnswer: 2
+    correctAnswer: 4
   },
   {
     id: 14,
@@ -650,12 +687,12 @@
     type: "کیفری",
     description: "در یک رستوران در تبریز، مشاجره میان دو نفر به زد و خورد کشید. یکی از آن‌ها با بطری شیشه‌ای ضربه‌ای به سر دیگری زد و موجب شکستگی جمجمه شد. پزشکی قانونی اعلام کرد آسیب شدید اما غیرکشنده بوده است. متهم مدعی شد تحت تأثیر الکل بوده است.",
     options: [
-      "تبرئه به دلیل مستی در زمان حادثه",
-      "پرداخت دیه و حبس تعزیری متوسط",
+    "پرداخت دیه و حبس تعزیری متوسط",
+    "تبرئه به دلیل مستی در زمان حادثه",
       "فقط اخطار کتبی و آزادی فوری",
       "قصاص به جرم قتل عمد"
     ],
-    correctAnswer: 2
+    correctAnswer: 1
   },
   {
     id: 19,
@@ -715,12 +752,12 @@
                     type: "کیفری",
                     description: "خانم جوانی به اتهام سرقت کیف پول یک بانوی مسن در مترو دستگیر شده است. دوربین‌های مداربسته نشان می‌دهند که او در حالتی که بانوی مسن خواب بوده، کیف او را برداشته است. متهم که سابقه کیفری ندارد، ادعا می‌کند که تحت فشار بدهی و مشکلات مالی این عمل را انجام داده است.",
                     options: [
-                        "حبس تعزیری ۱ سال به همراه استرداد اموال",
+                    "حبس تعزیری ۶ ماه و پرداخت جزای نقدی",
                         "حبس تعلیقی ۲ سال به شرط پرداخت خسارت",
                         "تنها استرداد اموال و تبرئه به دلیل ندامت متهم",
-                        "حبس تعزیری ۶ ماه و پرداخت جزای نقدی"
+                        "حبس تعزیری ۱ سال به همراه استرداد اموال",
                     ],
-                    correctAnswer: 1
+                    correctAnswer: 4
                 },
                 {
                     id: 24,
@@ -755,11 +792,11 @@
     description: "در تیر ۱۴۰۲، سرقت مسلحانه‌ای در یک طلافروشی در مشهد رخ داد. دو نفر با اسلحه و تهدید به خشونت وارد مغازه شدند و طلاجات به ارزش ۲ میلیارد تومان سرقت شد. مالک مغازه آسیب جزئی دید و دوربین مداربسته سرقت را ضبط کرد. پلیس با بررسی پلاک خودرو متهمان را شناسایی کرد.",
     options: [
       "تبرئه به علت فشار عصبی",
-      "حبس طولانی و پرداخت خسارت به مالک",
       "تنها ضبط اموال سرقت‌شده",
+      "حبس طولانی و پرداخت خسارت به مالک",
       "حبس کوتاه‌مدت به دلیل اولین جرم"
     ],
-    correctAnswer: 2
+    correctAnswer: 3
   },
   {
     id: 27,
@@ -794,11 +831,11 @@
     description: "در کرج، جوانی اقدام به جعل چک بانکی به ارزش ۲۰۰ میلیون تومان کرد و آن را به یک صرافی ارائه داد. صرافی پس از بررسی متوجه جعل شد و پرونده به دادگاه ارسال گردید. متهم ادعا کرد تحت فشار مالی شدید اقدام کرده و قصد کلاهبرداری نداشته است.",
     options: [
       "تبرئه به علت فشار مالی",
-      "حبس و بازپرداخت وجه به صرافی",
+      "تنها ضبط چک جعلی بدون حبس",
       "اخطار شفاهی و آزادی فوری",
-      "تنها ضبط چک جعلی بدون حبس"
+      "حبس و بازپرداخت وجه به صرافی",
     ],
-    correctAnswer: 2
+    correctAnswer: 4
   },
   {
     id: 30,
@@ -845,12 +882,12 @@
     type: "کیفری",
     description: "در مشهد، فردی اقدام به فروش داروی تقلبی به ارزش بیش از ۱ میلیارد تومان کرد. بررسی‌های کارشناسی داروهای جعلی را تأیید کرد و پلیس متهم را بازداشت نمود. متهم ادعا کرد قصد فریب عمدی نداشته و از کیفیت کالا مطلع نبوده است.",
     options: [
-      "تبرئه به علت بی‌اطلاعی",
+    "جریمه نقدی سبک بدون حبس",
       "حبس و ضبط داروهای جعلی",
-      "جریمه نقدی سبک بدون حبس",
+      "تبرئه به علت بی‌اطلاعی",
       "اخطار شفاهی به متهم"
     ],
-    correctAnswer: 2
+    correctAnswer: 3
   },
   {
     id: 34,
@@ -976,6 +1013,17 @@
         }
         
         function selectVerdict(selectedOption) {
+            // Check if user has coins
+            if (gameState.coins <= 0) {
+                showGameLost();
+                return;
+            }
+
+            // Check if user is restricted
+            if (gameState.isRestricted) {
+                return;
+            }
+
             const currentCase = gameState.cases[gameState.currentStage - 1];
             const gavelIcon = document.getElementById('gavel-icon');
             
@@ -997,6 +1045,7 @@
                 gameState.score += 20;
                 gameState.coins += 5;
                 gameState.correctAnswers++;
+                gameState.consecutiveMistakes = 0;
                 
                 // If restricted from previous mistake, lift restriction
                 if (gameState.isRestricted) {
@@ -1012,14 +1061,16 @@
                 gameState.score -= 10;
                 gameState.coins -= 5;
                 gameState.mistakes++;
+                gameState.consecutiveMistakes = (gameState.consecutiveMistakes || 0) + 1;
                 
-                // Check for restrictions
-                if (gameState.mistakes >= 2 && !gameState.isRestricted) {
-                    document.getElementById('restriction-applied').classList.remove('hidden');
-                    gameState.coins -= 20;
-                    gameState.isRestricted = true;
-                    gameState.mistakes = 0; // Reset mistake counter
-                } else if (gameState.mistakes === 1 && !gameState.isRestricted) {
+                // Check for consecutive mistakes
+                if (gameState.consecutiveMistakes >= 2) {
+                    applyRestriction();
+                    return;
+                }
+                
+                // Show warning for first mistake
+                if (gameState.consecutiveMistakes === 1) {
                     document.getElementById('restriction-warning').classList.remove('hidden');
                 }
             }
@@ -1029,6 +1080,41 @@
             
             // Show result modal
             resultModal.classList.remove('hidden');
+        }
+
+        function applyRestriction() {
+            gameState.isRestricted = true;
+            gameState.consecutiveMistakes = 0;
+            gameState.coins -= 20;
+            
+            // Show restriction modal
+            const restrictionModal = document.getElementById('restriction-modal');
+            restrictionModal.classList.remove('hidden');
+            
+            // Start countdown
+            let seconds = 80;
+            const countdown = document.getElementById('countdown');
+            countdown.textContent = seconds;
+            
+            const timer = setInterval(() => {
+                seconds--;
+                countdown.textContent = seconds;
+                
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    restrictionModal.classList.add('hidden');
+                    gameState.isRestricted = false;
+                    nextCase();
+                }
+            }, 1000);
+            
+            // Update UI
+            updateGameUI();
+        }
+
+        function showGameLost() {
+            gameSection.classList.add('hidden');
+            document.getElementById('game-lost-modal').classList.remove('hidden');
         }
         
         function nextCase() {
